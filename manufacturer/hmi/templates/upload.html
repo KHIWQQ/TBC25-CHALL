@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Upload Order{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+  <div class="upload-header">
+    <div class="header-left">
+      <h2><i class="fas fa-upload"></i> Upload Production Order</h2>
+      <p class="upload-subtitle">Upload .wcp files to create new production orders</p>
+    </div>
+    
+    <div class="header-info">
+      <div class="info-badge">
+        <i class="fas fa-info-circle"></i>
+        <span>Supported: .wcp files only</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="upload-steps">
+    <div class="step active" data-step="1">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h3>Order Details</h3>
+        <p>Enter order information</p>
+      </div>
+    </div>
+    
+    <div class="step-connector"></div>
+    
+    <div class="step" data-step="2">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h3>File Upload</h3>
+        <p>Select production file</p>
+      </div>
+    </div>
+    
+    <div class="step-connector"></div>
+    
+    <div class="step" data-step="3">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h3>Validation</h3>
+        <p>Verify and submit</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="upload-form-container">
+    <form method="POST" enctype="multipart/form-data" action="/upload" class="upload-form" id="upload-form">
+      
+      <!-- Step 1: Order Details -->
+      <div class="form-step active" data-step="1">
+        <div class="step-header">
+          <h3><i class="fas fa-clipboard"></i> Order Information</h3>
+          <p>Provide basic details for the production order</p>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="order_name">
+              <i class="fas fa-tag"></i>
+              Order Name *
+            </label>
+            <input 
+              type="text" 
+              id="order_name" 
+              name="order_name" 
+              placeholder="e.g., ORD-2024-001" 
+              required 
+              class="form-input"
+              pattern="[A-Za-z0-9\-_]+"
+              title="Use alphanumeric characters, hyphens, and underscores only"
+            />
+            <small class="form-help">Unique identifier for this production order</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="order_priority">
+              <i class="fas fa-exclamation"></i>
+              Priority Level
+            </label>
+            <select id="order_priority" name="order_priority" class="form-select">
+              <option value="low">Low Priority</option>
+              <option value="medium" selected>Medium Priority</option>
+              <option value="high">High Priority</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="order_description">
+              <i class="fas fa-align-left"></i>
+              Description
+            </label>
+            <textarea 
+              id="order_description" 
+              name="order_description" 
+              placeholder="Brief description of the production order..."
+              rows="3"
+              class="form-textarea"
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="estimated_duration">
+              <i class="fas fa-clock"></i>
+              Estimated Duration (hours)
+            </label>
+            <input 
+              type="number" 
+              id="estimated_duration" 
+              name="estimated_duration" 
+              placeholder="e.g., 8" 
+              min="0.5" 
+              max="168" 
+              step="0.5"
+              class="form-input"
+            />
+          </div>
+        </div>
+        
+        <div class="step-actions">
+          <button type="button" class="btn-step next" onclick="nextStep()">
+            Next Step <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: File Upload -->
+      <div class="form-step" data-step="2">
+        <div class="step-header">
+          <h3><i class="fas fa-file-upload"></i> Production File</h3>
+          <p>Select the .wcp file containing production instructions</p>
+        </div>
+        
+        <div class="file-upload-area" id="file-upload-area">
+          <div class="upload-zone" id="upload-zone">
+            <div class="upload-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h3>Drag & Drop File Here</h3>
+            <p>or <span class="upload-link">browse files</span></p>
+            <input 
+              type="file" 
+              id="file" 
+              name="file" 
+              accept=".wcp"
+              required
+              class="file-input"
+            />
+          </div>
+          
+          <div class="file-info" id="file-info" style="display: none;">
+            <div class="file-details">
+              <div class="file-icon">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div class="file-meta">
+                <span class="file-name" id="file-name"></span>
+                <span class="file-size" id="file-size"></span>
+              </div>
+              <button type="button" class="file-remove" onclick="removeFile()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            
+            <div class="upload-progress" id="upload-progress" style="display: none;">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+              <span class="progress-text" id="progress-text">0%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="file-requirements">
+          <h4><i class="fas fa-list-check"></i> File Requirements</h4>
+          <ul>
+            <li><i class="fas fa-check"></i> File format: .wcp only</li>
+            <li><i class="fas fa-check"></i> Maximum size: 50MB</li>
+            <li><i class="fas fa-check"></i> Must contain valid production data</li>
+            <li><i class="fas fa-check"></i> No corrupted or encrypted files</li>
+          </ul>
+        </div>
+        
+        <div class="step-actions">
+          <button type="button" class="btn-step prev" onclick="prevStep()">
+            <i class="fas fa-arrow-left"></i> Previous
+          </button>
+          <button type="button" class="btn-step next" onclick="nextStep()" disabled id="file-next-btn">
+            Next Step <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Validation & Submit -->
+      <div class="form-step" data-step="3">
+        <div class="step-header">
+          <h3><i class="fas fa-check-circle"></i> Review & Submit</h3>
+          <p>Verify all information before sending to PLC</p>
+        </div>
+        
+        <div class="review-section">
+          <div class="review-group">
+            <h4>Order Information</h4>
+            <div class="review-grid">
+              <div class="review-item">
+                <span class="review-label">Order Name:</span>
+                <span class="review-value" id="review-name">-</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Priority:</span>
+                <span class="review-value" id="review-priority">-</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Duration:</span>
+                <span class="review-value" id="review-duration">-</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Description:</span>
+                <span class="review-value" id="review-description">-</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="review-group">
+            <h4>File Information</h4>
+            <div class="review-grid">
+              <div class="review-item">
+                <span class="review-label">File Name:</span>
+                <span class="review-value" id="review-filename">-</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">File Size:</span>
+                <span class="review-value" id="review-filesize">-</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">File Type:</span>
+                <span class="review-value">.wcp</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="warning-notice">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div class="warning-content">
+            <h4>Important Notice</h4>
+            <p>This production order will be immediately sent to the PLC system. Ensure all information is correct before proceeding.</p>
+          </div>
+        </div>
+        
+        <div class="step-actions">
+          <button type="button" class="btn-step prev" onclick="prevStep()">
+            <i class="fas fa-arrow-left"></i> Previous
+          </button>
+          <button type="submit" class="btn-step submit">
+            <i class="fas fa-paper-plane"></i> Send to PLC
+          </button>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+const maxSteps = 3;
+
+function nextStep() {
+  if (currentStep < maxSteps && validateCurrentStep()) {
+    currentStep++;
+    updateStepDisplay();
+    updateReviewData();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    currentStep--;
+    updateStepDisplay();
+  }
+}
+
+function updateStepDisplay() {
+  // Update step indicators
+  document.querySelectorAll('.step').forEach((step, index) => {
+    const stepNumber = index + 1;
+    if (stepNumber < currentStep) {
+      step.classList.add('completed');
+      step.classList.remove('active');
+    } else if (stepNumber === currentStep) {
+      step.classList.add('active');
+      step.classList.remove('completed');
+    } else {
+      step.classList.remove('active', 'completed');
+    }
+  });
+  
+  // Update form steps
+  document.querySelectorAll('.form-step').forEach((step, index) => {
+    const stepNumber = index + 1;
+    if (stepNumber === currentStep) {
+      step.classList.add('active');
+    } else {
+      step.classList.remove('active');
+    }
+  });
+}
+
+function validateCurrentStep() {
+  if (currentStep === 1) {
+    const orderName = document.getElementById('order_name').value;
+    return orderName.trim() !== '';
+  } else if (currentStep === 2) {
+    const fileInput = document.getElementById('file');
+    return fileInput.files.length > 0;
+  }
+  return true;
+}
+
+function updateReviewData() {
+  if (currentStep === 3) {
+    document.getElementById('review-name').textContent = document.getElementById('order_name').value || '-';
+    document.getElementById('review-priority').textContent = document.getElementById('order_priority').value || '-';
+    document.getElementById('review-duration').textContent = (document.getElementById('estimated_duration').value || '-') + (document.getElementById('estimated_duration').value ? ' hours' : '');
+    document.getElementById('review-description').textContent = document.getElementById('order_description').value || 'No description provided';
+    
+    const fileInput = document.getElementById('file');
+    if (fileInput.files.length > 0) {
+      document.getElementById('review-filename').textContent = fileInput.files[0].name;
+      document.getElementById('review-filesize').textContent = formatFileSize(fileInput.files[0].size);
+    }
+  }
+}
+
+// File upload handling
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('file');
+const fileInfo = document.getElementById('file-info');
+const fileNextBtn = document.getElementById('file-next-btn');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('drag-over');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFileSelect(files[0]);
+  }
+});
+
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) {
+    handleFileSelect(e.target.files[0]);
+  }
+});
+
+function handleFileSelect(file) {
+  if (!file.name.endsWith('.wcp')) {
+    alert('Please select a .wcp file only.');
+    return;
+  }
+  
+  if (file.size > 50 * 1024 * 1024) { // 50MB limit
+    alert('File size must be less than 50MB.');
+    return;
+  }
+  
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = formatFileSize(file.size);
+  
+  uploadZone.style.display = 'none';
+  fileInfo.style.display = 'block';
+  fileNextBtn.disabled = false;
+}
+
+function removeFile() {
+  fileInput.value = '';
+  uploadZone.style.display = 'block';
+  fileInfo.style.display = 'none';
+  fileNextBtn.disabled = true;
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Form validation
+document.getElementById('upload-form').addEventListener('submit', function(e) {
+  if (!validateCurrentStep()) {
+    e.preventDefault();
+    alert('Please complete all required fields.');
+  }
+});
+</script>
+{% endblock %}

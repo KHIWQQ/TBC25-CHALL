@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>SuppDex // Field Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #0ea5e9;
+        --primary-dark: #0284c7;
+        --primary-light: #38bdf8;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --error-color: #ef4444;
+        --background-primary: #0f172a;
+        --background-secondary: #1e293b;
+        --background-tertiary: #334155;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --border-color: #334155;
+        --border-light: #475569;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        
+        /* Override Pico variables */
+        --pico-primary: var(--primary-color);
+        --pico-primary-background: var(--background-primary);
+        --pico-background-color: var(--background-primary);
+        --pico-card-background-color: var(--background-secondary);
+        --pico-card-border-color: var(--border-color);
+        --pico-color: var(--text-primary);
+        --pico-muted-color: var(--text-muted);
+        --pico-code-background-color: var(--background-tertiary);
+        --pico-border-color: var(--border-color);
+      }
+
+      * {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, var(--background-primary) 0%, #1a202c 100%);
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      /* Header Styles */
+      header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, var(--background-secondary) 0%, var(--background-tertiary) 100%);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      header::before {
+        content: "⚡";
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+      }
+
+      /* Article/Card Styles */
+      article {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      article::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
+      }
+
+      article:hover {
+        border-color: var(--border-light);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+      }
+
+      article h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* Section Icons */
+      article h3::before {
+        font-size: 1.2em;
+        opacity: 0.8;
+      }
+
+      article:nth-child(1) h3::before { content: "💼"; }
+      article:nth-child(2) h3::before { content: "🎯"; }
+      article:nth-child(3) h3::before { content: "🚀"; }
+
+      /* Button Styles */
+      button {
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+        font-size: 0.9rem;
+        letter-spacing: 0.025em;
+      }
+
+      button:not(.secondary) {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      button:not(.secondary):hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+
+      button.secondary {
+        background: var(--background-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+      }
+
+      button.secondary:hover {
+        background: var(--border-light);
+        color: var(--text-primary);
+        border-color: var(--border-light);
+      }
+
+      button.small {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 0.5rem;
+      }
+
+      /* Typography */
+      .mono {
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-weight: 400;
+      }
+
+      .muted {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .small {
+        font-size: 0.875rem;
+      }
+
+      /* Status Colors */
+      .ok {
+        color: var(--success-color);
+        font-weight: 500;
+      }
+
+      .err {
+        color: var(--error-color);
+        font-weight: 500;
+      }
+
+      .warn {
+        color: var(--warning-color);
+        font-weight: 500;
+      }
+
+      /* Grid and Layout */
+      .kv {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 0.75rem 1rem;
+        align-items: start;
+      }
+
+      .codebox {
+        background: var(--background-tertiary);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        overflow: auto;
+        border: 1px solid var(--border-color);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        word-break: break-all;
+        position: relative;
+      }
+
+      .codebox::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color) 0%, transparent 100%);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        border-radius: 9999px;
+        background: var(--background-tertiary);
+        border: 1px solid var(--border-color);
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
+      .right {
+        text-align: right;
+      }
+
+      /* Grid Layouts */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+
+      /* Details/Summary */
+      details {
+        margin-top: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        overflow: hidden;
+      }
+
+      details summary {
+        background: var(--background-tertiary);
+        padding: 1rem;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      details summary:hover {
+        background: var(--border-light);
+        color: var(--text-primary);
+      }
+
+      details[open] summary {
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      details .kv {
+        padding: 1rem;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 2rem;
+        background: var(--background-secondary);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+        
+        header h1 {
+          font-size: 2rem;
+        }
+        
+        article {
+          padding: 1.5rem;
+        }
+        
+        .kv {
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+        }
+        
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Loading and Animation States */
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      @keyframes shimmer {
+        0% { background-position: -200px 0; }
+        100% { background-position: calc(200px + 100%) 0; }
+      }
+
+      .loading {
+        animation: pulse 2s infinite;
+        position: relative;
+      }
+
+      .loading::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        animation: shimmer 1.5s infinite;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 0.5rem;
+      }
+
+      .loading-skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--background-tertiary) 25%,
+          var(--border-light) 50%,
+          var(--background-tertiary) 75%
+        );
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 0.375rem;
+        height: 1.25rem;
+      }
+
+      /* Focus States */
+      button:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--background-secondary);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--border-light);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>SuppDex Field Console</h1>
+        <p style="color: var(--text-muted); margin: 0; font-size: 1.1rem; font-weight: 300;">Enterprise Blockchain Management Interface</p>
+        <div id="globalLoading" style="display: none; margin-top: 1rem; color: var(--primary-color); font-size: 0.9rem;">
+          <span class="spinner"></span>
+          Processing request...
+        </div>
+      </header>
+
+      <section>
+        <article>
+          <h3>Wallet Management</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Initialize or restore your session-bound wallet with <span class="badge">10 ETH</span> funding. Session management via secure cookie authentication.</p>
+          
+          <div class="grid">
+            <div>
+              <button id="btnCreate" onclick="createOrResumeWallet()">🔐 Create / Resume Wallet</button>
+            </div>
+            <div>
+              <button class="secondary" onclick="readWallet()">👁️ Show Current Wallet</button>
+            </div>
+          </div>
+
+          <div id="walletBox" style="display:none; margin-top: 1.5rem;">
+            <div style="background: var(--background-tertiary); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border-color);">
+              <div class="kv small mono">
+                <div class="muted">Session ID</div>
+                <div id="sidOut" style="color: var(--text-primary); font-weight: 500;">—</div>
+                <div class="muted">Wallet Address</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span id="addrOut" style="color: var(--primary-color); font-weight: 500;">—</span>
+                  <button class="secondary small" onclick="copyText('addrOut')" title="Copy Address">📋</button>
+                </div>
+                <div class="muted">Private Key</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span id="pkOut" class="codebox mono" style="flex: 1; margin: 0;"></span>
+                  <button class="secondary small" onclick="copyText('pkOut')" title="Copy Private Key">📋</button>
+                </div>
+              </div>
+            </div>
+            
+            <details style="margin-top: 1rem;">
+              <summary style="font-weight: 600; color: var(--text-secondary);">🔧 Deployment Account Details</summary>
+              <div class="kv small mono" style="margin-top: 1rem;">
+                <div class="muted">Funder Address</div>
+                <div id="funderAddrOut" style="color: var(--text-primary);">—</div>
+                <div class="muted">Public Key</div>
+                <div id="funderPubOut" style="color: var(--text-secondary);">—</div>
+                <div class="muted">Private Key</div>
+                <div id="funderPkOut" class="codebox mono"></div>
+              </div>
+            </details>
+          </div>
+
+          <div id="walletMsg" class="small" style="margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; display: none;"></div>
+        </article>
+      </section>
+
+      <section>
+        <article>
+          <h3>Solution Verification</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Verify challenge completion and retrieve your flag. Monitor proxy contract status and balances.</p>
+          
+          <div class="grid">
+            <div>
+              <button onclick="checkSolved()">🎯 Check & Retrieve Flag</button>
+            </div>
+          </div>
+
+          <div style="background: var(--background-tertiary); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border-color); margin-top: 1.5rem;">
+            <div class="kv mono small">
+              <div class="muted">Status</div>
+              <div id="solvedOut" style="font-weight: 600;">—</div>
+              <div class="muted">Challenge Flag</div>
+              <div id="flagOut" class="codebox mono" style="background: var(--background-primary); border: 1px solid var(--primary-color); color: var(--primary-light);">—</div>
+              <div class="muted">Proxy Contract</div>
+              <div id="proxyOut" style="color: var(--text-primary); font-weight: 500;">—</div>
+              <div class="muted">Proxy Balance</div>
+              <div id="proxyBal" style="color: var(--text-primary); font-weight: 500;">—</div>
+            </div>
+          </div>
+
+          <div id="solveMsg" class="small" style="margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; display: none;"></div>
+        </article>
+      </section>
+
+      <section>
+        <article>
+          <h3>Deployment Information</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Read-only metadata and configuration for the global blockchain instance.</p>
+          
+          <div style="background: var(--background-tertiary); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border-color);">
+            <div class="kv small mono">
+              <div class="muted">Setup Contract</div>
+              <div id="setupOut" style="color: var(--text-primary); font-weight: 500;">—</div>
+              <div class="muted">Proxy Address</div>
+              <div id="depProxyOut" style="color: var(--primary-color); font-weight: 500;">—</div>
+              <div class="muted">Current Balance</div>
+              <div id="depProxyBal" style="color: var(--success-color); font-weight: 600;">—</div>
+            </div>
+          </div>
+          
+          <div class="right" style="margin-top: 1rem;">
+            <button class="secondary" onclick="loadDeployment()">🔄 Refresh Data</button>
+          </div>
+        </article>
+      </section>
+
+      <footer>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <span style="color: var(--text-muted);">🌐 RPC Endpoint:</span>
+          <span class="mono badge" id="rpcOut" style="background: var(--background-tertiary); color: var(--primary-light);">http://localhost:8545</span>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+          Powered by SuppDex Enterprise • Secure Blockchain Interface
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      const API_BASE = ""; // same origin
+
+      function setText(id, v) {
+        const el = document.getElementById(id);
+        if (el) 
+          el.textContent = v ?? "—";
+        }
+      function show(id, on) {
+        const el = document.getElementById(id);
+        if (el) 
+          el.style.display = on
+            ? ""
+            : "none";
+        }
+      function copyText(id) {
+        const t = document.getElementById(id)?.textContent ?? "";
+        const btn = event?.target;
+        
+        if (t && t !== "—") {
+          navigator.clipboard.writeText(t).then(() => {
+            if (btn) {
+              const originalText = btn.textContent;
+              btn.textContent = "✓";
+              btn.style.background = "var(--success-color)";
+              btn.style.color = "white";
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = "";
+                btn.style.color = "";
+              }, 1000);
+            }
+          }).catch(() => {
+            if (btn) {
+              const originalText = btn.textContent;
+              btn.textContent = "✗";
+              btn.style.background = "var(--error-color)";
+              btn.style.color = "white";
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = "";
+                btn.style.color = "";
+              }, 1000);
+            }
+          });
+        }
+      }
+
+      function showGlobalLoading(show = true) {
+        const loader = document.getElementById("globalLoading");
+        if (loader) {
+          loader.style.display = show ? "block" : "none";
+        }
+      }
+      function setMsg(id, msg, kind = "") {
+        const el = document.getElementById(id);
+        if (!el)
+          return;
+        
+        if (!msg) {
+          el.style.display = "none";
+          return;
+        }
+        
+        el.textContent = msg;
+        el.style.display = "block";
+        
+        // Reset classes
+        el.className = "small";
+        
+        // Apply styling based on kind
+        switch (kind) {
+          case "ok":
+            el.style.background = "rgba(16, 185, 129, 0.1)";
+            el.style.color = "var(--success-color)";
+            el.style.border = "1px solid rgba(16, 185, 129, 0.3)";
+            break;
+          case "err":
+            el.style.background = "rgba(239, 68, 68, 0.1)";
+            el.style.color = "var(--error-color)";
+            el.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+            break;
+          case "warn":
+            el.style.background = "rgba(245, 158, 11, 0.1)";
+            el.style.color = "var(--warning-color)";
+            el.style.border = "1px solid rgba(245, 158, 11, 0.3)";
+            break;
+          default:
+            el.style.background = "var(--background-tertiary)";
+            el.style.color = "var(--text-secondary)";
+            el.style.border = "1px solid var(--border-color)";
+        }
+      }
+
+      function setLoading(buttonId, loading = true) {
+        const btn = document.getElementById(buttonId);
+        if (!btn) return;
+        
+        if (loading) {
+          btn.disabled = true;
+          btn.style.opacity = "0.8";
+          btn.classList.add("loading");
+          const originalText = btn.textContent;
+          btn.dataset.originalText = originalText;
+          
+          // Add spinner and update text
+          const cleanText = originalText.replace(/^[🔐👁️🎯🔄]\s*/, "");
+          btn.innerHTML = `<span class="spinner"></span>Loading...`;
+        } else {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.classList.remove("loading");
+          if (btn.dataset.originalText) {
+            btn.textContent = btn.dataset.originalText;
+          }
+        }
+      }
+
+      function setLoadingSkeleton(elementId, loading = true) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        
+        if (loading) {
+          el.dataset.originalContent = el.innerHTML;
+          el.innerHTML = '<div class="loading-skeleton"></div>';
+        } else {
+          if (el.dataset.originalContent) {
+            el.innerHTML = el.dataset.originalContent;
+          }
+        }
+      }
+
+      function setLoadingText(elementId, loading = true, loadingText = "Loading...") {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        
+        if (loading) {
+          el.dataset.originalText = el.textContent;
+          el.innerHTML = `<span class="spinner"></span>${loadingText}`;
+          el.style.color = "var(--text-muted)";
+        } else {
+          if (el.dataset.originalText) {
+            el.textContent = el.dataset.originalText;
+          }
+          el.style.color = "";
+        }
+      }
+
+      function updateSolvedStatus(solved) {
+        const statusEl = document.getElementById("solvedOut");
+        if (!statusEl) return;
+        
+        if (solved === true) {
+          statusEl.textContent = "✅ SOLVED";
+          statusEl.style.color = "var(--success-color)";
+          statusEl.style.fontWeight = "700";
+        } else if (solved === false) {
+          statusEl.textContent = "❌ PENDING";
+          statusEl.style.color = "var(--warning-color)";
+          statusEl.style.fontWeight = "600";
+        } else {
+          statusEl.textContent = "—";
+          statusEl.style.color = "var(--text-muted)";
+          statusEl.style.fontWeight = "500";
+        }
+      }
+
+      async function httpJSON(url, opts = {}) {
+        const res = await fetch(url, {
+          headers: {
+            "content-type": "application/json",
+            ...(opts.headers || {})
+          },
+          ...opts
+        });
+        const data = await res
+          .json()
+          .catch(() => ({}));
+        if (!res.ok) 
+          throw new Error(
+            data
+            ?.error || res.statusText);
+        return data;
+      }
+
+      /* ---------- wallet ---------- */
+      async function createOrResumeWallet() {
+        setMsg("walletMsg", "");
+        setLoading("btnCreate", true);
+        showGlobalLoading(true);
+        
+        try {
+          const r = await httpJSON(`${API_BASE}/wallet`, {method: "POST"});
+          const {sid, wallet, funder, deployment} = r;
+          
+          show("walletBox", true);
+          setText("sidOut", sid);
+          setText("addrOut", wallet?.address || "—");
+          document.getElementById("pkOut").textContent = wallet?.privateKey || "—";
+          setText("funderAddrOut", funder?.address || "—");
+          setText("funderPubOut", funder?.publicKey || "—");
+          document.getElementById("funderPkOut").textContent = funder?.privateKey || "—";
+          
+          // mirror into deployment card
+          applyDeployment(deployment);
+          setMsg("walletMsg", "✅ Wallet successfully created and funded with 10 ETH", "ok");
+        } catch (e) {
+          setMsg("walletMsg", "❌ " + (e.message || String(e)), "err");
+        } finally {
+          setLoading("btnCreate", false);
+          showGlobalLoading(false);
+        }
+      }
+
+      async function readWallet() {
+        setMsg("walletMsg", "");
+        showGlobalLoading(true);
+        
+        // Find and set loading state for the show wallet button
+        const showBtn = document.querySelector('button[onclick="readWallet()"]');
+        if (showBtn) {
+          showBtn.disabled = true;
+          showBtn.innerHTML = '<span class="spinner"></span>Loading...';
+        }
+        
+        // Set loading states for wallet fields
+        setLoadingText("sidOut", true, "Loading...");
+        setLoadingText("addrOut", true, "Loading...");
+        setLoadingSkeleton("pkOut", true);
+        
+        try {
+          const r = await httpJSON(`${API_BASE}/wallet`);
+          const {sid, wallet, deployment} = r;
+          
+          // Clear loading states
+          setLoadingText("sidOut", false);
+          setLoadingText("addrOut", false);
+          setLoadingSkeleton("pkOut", false);
+          
+          show("walletBox", !!wallet);
+          setText("sidOut", sid);
+          
+          if (wallet) {
+            setText("addrOut", wallet.address);
+            document.getElementById("pkOut").textContent = wallet.privateKey;
+            setMsg("walletMsg", "📄 Current session wallet loaded successfully", "ok");
+          } else {
+            setText("addrOut", "—");
+            document.getElementById("pkOut").textContent = "—";
+            setMsg("walletMsg", "⚠️ No wallet provisioned for this session yet", "warn");
+          }
+          
+          applyDeployment(deployment);
+        } catch (e) {
+          // Clear loading states on error
+          setLoadingText("sidOut", false);
+          setLoadingText("addrOut", false);
+          setLoadingSkeleton("pkOut", false);
+          
+          setText("sidOut", "—");
+          setText("addrOut", "—");
+          document.getElementById("pkOut").textContent = "—";
+          
+          setMsg("walletMsg", "❌ " + (e.message || String(e)), "err");
+        } finally {
+          // Reset button state
+          if (showBtn) {
+            showBtn.disabled = false;
+            showBtn.textContent = "👁️ Show Current Wallet";
+          }
+          showGlobalLoading(false);
+        }
+      }
+
+      /* ---------- solved / flags ---------- */
+      function getFlagInputs() {
+        const flagId = (
+          document.getElementById("flagId")
+          ?.value || "").trim();
+        const jwt = (
+          document.getElementById("jwt")
+          ?.value || "").trim();
+        return {flagId, jwt};
+      }
+
+      async function checkSolved() {
+        setMsg("solveMsg", "");
+        showGlobalLoading(true);
+        
+        // Find the button that triggered this
+        const checkBtn = document.querySelector('button[onclick="checkSolved()"]');
+        if (checkBtn) {
+          checkBtn.disabled = true;
+          checkBtn.innerHTML = '<span class="spinner"></span>Checking...';
+        }
+        
+        // Set loading states for result fields
+        setLoadingText("solvedOut", true, "Checking...");
+        setLoadingSkeleton("flagOut", true);
+        setLoadingText("proxyOut", true, "Loading...");
+        setLoadingText("proxyBal", true, "Loading...");
+        
+        try {
+          const r = await httpJSON(`${API_BASE}/isSolved`);
+          
+          // Clear loading states
+          setLoadingText("solvedOut", false);
+          setLoadingSkeleton("flagOut", false);
+          setLoadingText("proxyOut", false);
+          setLoadingText("proxyBal", false);
+          
+          updateSolvedStatus(r.solved);
+          setText("flagOut", r.flag || "—");
+          setText("proxyOut", r.proxy || "—");
+          setText("proxyBal", (r.proxyBalanceETH ?? "—") + (r.proxyBalanceETH ? " ETH" : ""));
+          
+          if (r.solved) {
+            setMsg("solveMsg", "🎉 Challenge solved! Flag retrieved and popped successfully.", "ok");
+          } else {
+            setMsg("solveMsg", "⏳ Challenge not yet solved. Keep working on the solution.", "warn");
+          }
+        } catch (e) {
+          // Clear loading states on error
+          setLoadingText("solvedOut", false);
+          setLoadingSkeleton("flagOut", false);
+          setLoadingText("proxyOut", false);
+          setLoadingText("proxyBal", false);
+          
+          updateSolvedStatus(null);
+          setText("flagOut", "—");
+          setText("proxyOut", "—");
+          setText("proxyBal", "—");
+          
+          setMsg("solveMsg", "❌ " + (e.message || String(e)), "err");
+        } finally {
+          // Reset button state
+          if (checkBtn) {
+            checkBtn.disabled = false;
+            checkBtn.textContent = "🎯 Check & Retrieve Flag";
+          }
+          showGlobalLoading(false);
+        }
+      }
+
+      async function getFlagById() {
+        setMsg("solveMsg", "");
+        const {flagId, jwt} = getFlagInputs();
+        if (!flagId || !jwt) {
+          setMsg("solveMsg", "flag_id and JWT are required", "warn");
+          return;
+        }
+        try {
+          const r = await httpJSON(`${API_BASE}/flags/${encodeURIComponent(flagId)}`, {
+            headers: {
+              authorization: `Bearer ${jwt}`
+            }
+          });
+          setText("solvedOut", "—");
+          setText("flagOut", r.flag || "—");
+          setMsg("solveMsg", "Fetched flag by ID (not popped).", "ok");
+        } catch (e) {
+          setMsg("solveMsg", e.message || String(e), "err");
+        }
+      }
+
+      /* ---------- deployment ---------- */
+      async function loadDeployment() {
+        // Don't show global loading on initial page load
+        const isInitialLoad = !document.querySelector('button[onclick="loadDeployment()"]')?.disabled;
+        if (!isInitialLoad) {
+          showGlobalLoading(true);
+        }
+        
+        // Find and set loading state for the refresh button
+        const refreshBtn = document.querySelector('button[onclick="loadDeployment()"]');
+        if (refreshBtn) {
+          refreshBtn.disabled = true;
+          refreshBtn.innerHTML = '<span class="spinner"></span>Refreshing...';
+        }
+        
+        // Set loading states for deployment fields
+        setLoadingText("setupOut", true, "Loading...");
+        setLoadingText("depProxyOut", true, "Loading...");
+        setLoadingText("depProxyBal", true, "Loading...");
+        
+        try {
+          const r = await httpJSON(`${API_BASE}/deployment`);
+          
+          // Clear loading states
+          setLoadingText("setupOut", false);
+          setLoadingText("depProxyOut", false);
+          setLoadingText("depProxyBal", false);
+          
+          applyDeployment(r.deployment, r.proxyBalanceETH);
+        } catch (e) {
+          // Clear loading states on error and set defaults
+          setLoadingText("setupOut", false);
+          setLoadingText("depProxyOut", false);
+          setLoadingText("depProxyBal", false);
+          
+          setText("setupOut", "—");
+          setText("depProxyOut", "—");
+          setText("depProxyBal", "—");
+        } finally {
+          // Reset button state
+          if (refreshBtn) {
+            refreshBtn.disabled = false;
+            refreshBtn.textContent = "🔄 Refresh Data";
+          }
+          if (!isInitialLoad) {
+            showGlobalLoading(false);
+          }
+        }
+      }
+
+      function applyDeployment(dep, bal) {
+        if (!dep)
+          return;
+        
+        setText("setupOut", dep.setup);
+        setText("depProxyOut", dep.proxy);
+        
+        if (bal !== undefined) {
+          setText("depProxyBal", bal + " ETH");
+        }
+        
+        // Update RPC endpoint display
+        const rpcEl = document.getElementById("rpcOut");
+        if (rpcEl) {
+          rpcEl.textContent = window.location.origin + " / RPC: http://anvil:8545";
+        }
+      }
+
+      loadDeployment();
+    </script>
+  </body>
+</html>

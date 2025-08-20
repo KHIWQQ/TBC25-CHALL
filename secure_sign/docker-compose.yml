@@ -1,0 +1,10 @@
+services:
+  secure_sign:
+    build: .
+    image: ctfae_ad:secure_sign
+    container_name: secure_sign
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./storage.db:/app/storage.db
+    restart: always

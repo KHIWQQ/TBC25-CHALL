@@ -1,0 +1,65 @@
+services:
+  web:
+    build: .
+    image: hr_portal:web
+    container_name: hr_portal_web
+    ports:
+      - "8082:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./src/uploads:/var/www/html/uploads
+      - ./logs:/var/log/apache2
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_NAME=hr_portal
+      - DB_USER=hr_user
+      - DB_PASS=hr_password
+      - PHP_ENV=development
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: mysql:8.0
+    container_name: hr_portal_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: hr_portal
+      MYSQL_USER: hr_user
+      MYSQL_PASSWORD: hr_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./logs/mysql:/var/log/mysql
+    command: --general-log=1 --general-log-file=/var/log/mysql/general.log --log-error=/var/log/mysql/error.log --innodb-buffer-pool-size=256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "hr_user", "-phr_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: hr_portal_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: hr_user
+      PMA_PASSWORD: hr_password
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:

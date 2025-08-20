@@ -1,0 +1,11 @@
+[profile.default]
+	evm_version = "prague"
+	fs_permissions = [
+		{ access = "read-write", path = "/app/data" },
+	]
+	libs = ["lib"]
+	out = "out"
+	src = "src"
+
+
+	# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

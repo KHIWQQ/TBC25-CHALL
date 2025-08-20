@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Documentation{% endblock %}
+
+{% block content %}
+<div class="manual-container">
+  <div class="manual-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h2><i class="fas fa-book"></i> SmartLine™ HMI – Operator Quick Start</h2>
+        <p class="manual-subtitle">Product: SL-HMI-100 · Document: QSG-SLHMI-1.0 · Rev: A · © SmartLine Automation</p>
+      </div>
+      
+      <div class="header-actions">
+        <button class="action-btn secondary" onclick="window.print()">
+          <i class="fas fa-print"></i>
+          <span>Print Manual</span>
+        </button>
+        
+        <button class="action-btn primary" onclick="downloadPDF()">
+          <i class="fas fa-download"></i>
+          <span>Download PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc-section">
+    <div class="toc-header">
+      <h3><i class="fas fa-list"></i> Table of Contents</h3>
+    </div>
+    <div class="toc-content">
+      <nav class="toc-nav">
+        <ul>
+          <li><a href="#purpose">Purpose & Overview</a></li>
+          <li><a href="#defaults">Factory Defaults</a></li>
+          <li><a href="#network">Network & Ports</a></li>
+          <li><a href="#login">First Login</a></li>
+          <li><a href="#upload">Uploading Production Orders</a></li>
+          <li><a href="#status">Line Status & Indicators</a></li>
+          <li><a href="#commissioning">Commissioning Checklist</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#appendix">PLC Register Map</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="manual-content">
+    <!-- Purpose Section -->
+    <section id="purpose" class="manual-section">
+      <div class="section-card purpose-card">
+        <div class="section-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="section-content">
+          <h3>Purpose</h3>
+          <p>This comprehensive quick start guide helps operators access, configure, and operate the SmartLine HMI connected to the SmartLine PLC gateway for industrial automation and control.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Factory Defaults & Network Grid -->
+    <div class="manual-grid">
+      <section id="defaults" class="manual-section">
+        <div class="section-card">
+          <div class="section-header">
+            <h3><i class="fas fa-key"></i> Factory Defaults</h3>
+          </div>
+          <div class="credentials-table">
+            <table class="manual-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Operator (HMI)</td>
+                  <td><code class="credential-code">admin</code></td>
+                  <td><code class="credential-code">admin</code></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="alert-box warning">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div class="alert-content">
+                <strong>Commissioning Required:</strong> Change default credentials after acceptance testing. See Settings → Users.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="network" class="manual-section">
+        <div class="section-card">
+          <div class="section-header">
+            <h3><i class="fas fa-network-wired"></i> Network & Ports</h3>
+          </div>
+          <div class="network-table">
+            <table class="manual-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Endpoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>HMI Web UI</td>
+                  <td>HTTP on port <code>80</code> (container default exposed as <code>8080</code>)</td>
+                </tr>
+                <tr>
+                  <td>PLC Control (Modbus/TCP)</td>
+                  <td>TCP <code>502</code> (internal OT network)</td>
+                </tr>
+                <tr>
+                  <td>Historian DB</td>
+                  <td>PostgreSQL <code>5432</code> (OT network)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="alert-box success">
+              <i class="fas fa-check-circle"></i>
+              <div class="alert-content">
+                For commissioning, access the HMI from an operations workstation on the OT network/VLAN.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Login Instructions -->
+    <section id="login" class="manual-section">
+      <div class="section-card">
+        <div class="section-header">
+          <h3><i class="fas fa-sign-in-alt"></i> 1. First Login</h3>
+        </div>
+        <div class="procedure-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <p>Open your browser and navigate to the HMI homepage (e.g. <code>http://&lt;hmi-host&gt;:8080/</code>).</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <p>Select <kbd class="manual-kbd">Login</kbd> and enter the factory default Operator credentials:</p>
+              <div class="credential-display">
+                <span class="credential-item"><kbd class="manual-kbd">admin</kbd></span>
+                <span class="credential-separator">/</span>
+                <span class="credential-item"><kbd class="manual-kbd">admin</kbd></span>
+              </div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <p>Upon success you'll be redirected to the Operator Dashboard.</p>
+            </div>
+          </div>
+        </div>
+        <div class="alert-box danger">
+          <i class="fas fa-exclamation-circle"></i>
+          <div class="alert-content">
+            <strong>Important:</strong> Default credentials remain enabled until changed by a supervisor. Update them during commissioning.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Instructions -->
+    <section id="upload" class="manual-section">
+      <div class="section-card">
+        <div class="section-header">
+          <h3><i class="fas fa-upload"></i> 2. Uploading a Production Order</h3>
+        </div>
+        <div class="section-intro">
+          <p>The HMI accepts production schedule files in <strong>.wcp</strong> format (text-based). To upload:</p>
+        </div>
+        <div class="procedure-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <p>From the dashboard, choose <kbd class="manual-kbd">Upload Production Order</kbd>.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <p>Provide an <em>Order Name</em> (alphanumeric), then click <kbd class="manual-kbd">Choose File</kbd> and select the <code>.wcp</code> file.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <p>Press <kbd class="manual-kbd">Send to PLC</kbd>. The order bytes are forwarded to the PLC gateway for immediate processing.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <p>Review the <kbd class="manual-kbd">Orders</kbd> list to confirm the file name and size.</p>
+            </div>
+          </div>
+        </div>
+        <div class="alert-box info">
+          <i class="fas fa-info-circle"></i>
+          <div class="alert-content">
+            If the line is running, the new order will be applied at the next control cycle.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Status Indicators -->
+    <section id="status" class="manual-section">
+      <div class="section-card">
+        <div class="section-header">
+          <h3><i class="fas fa-tachometer-alt"></i> 3. Line Status & Indicators</h3>
+        </div>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-icon run">
+              <i class="fas fa-play"></i>
+            </div>
+            <div class="status-content">
+              <h4>Run/Stop</h4>
+              <p><strong>RUN</strong> indicates conveyor motion; <strong>STOP</strong> indicates halted motion. Verify e-stop is clear before starting.</p>
+            </div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon emergency">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="status-content">
+              <h4>Emergency OK</h4>
+              <p>Shows whether emergency chain is healthy. If <em>false</em>, inspect safety interlocks and reset per site procedures.</p>
+            </div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon quality">
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="status-content">
+              <h4>Quality Score</h4>
+              <p>Rolling quality indicator (0–100). Investigate abnormal drops (jam, mispick, sensor drift).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Commissioning Checklist -->
+    <section id="commissioning" class="manual-section">
+      <div class="section-card">
+        <div class="section-header">
+          <h3><i class="fas fa-tasks"></i> 4. Commissioning Checklist</h3>
+        </div>
+        <div class="checklist">
+          <div class="checklist-item">
+            <i class="fas fa-square-check"></i>
+            <span>Change Operator default password (<kbd class="manual-kbd">Settings → Users</kbd>).</span>
+          </div>
+          <div class="checklist-item">
+            <i class="fas fa-square-check"></i>
+            <span>Restrict HMI access to the operations VLAN.</span>
+          </div>
+          <div class="checklist-item">
+            <i class="fas fa-square-check"></i>
+            <span>Back up configuration and order templates to the site repository.</span>
+          </div>
+          <div class="checklist-item">
+            <i class="fas fa-square-check"></i>
+            <span>Validate historian connectivity (records appear within 2 minutes).</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section id="troubleshooting" class="manual-section">
+      <div class="section-card">
+        <div class="section-header">
+          <h3><i class="fas fa-wrench"></i> 5. Troubleshooting</h3>
+        </div>
+        <div class="troubleshooting-table">
+          <table class="manual-table troubleshooting">
+            <thead>
+              <tr>
+                <th>Symptom</th>
+                <th>Check</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cannot log in</td>
+                <td>Network reachability; use defaults <code>admin/admin</code></td>
+                <td>Verify OT VLAN, ensure HMI service is running</td>
+              </tr>
+              <tr>
+                <td>Order not applied</td>
+                <td>File format <code>.wcp</code>, file size</td>
+                <td>Retry upload; confirm dashboard shows new entry</td>
+              </tr>
+              <tr>
+                <td>No live status</td>
+                <td>PLC link (Modbus/TCP)</td>
+                <td>Check PLC gateway connectivity</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLC Register Map -->
+    <section id="appendix" class="manual-section">
+      <div class="section-card">
+        <div class="section-header">
+          <h3><i class="fas fa-microchip"></i> Appendix A — PLC Holding Register Map</h3>
+          <span class="section-badge">Read-Only Snapshot</span>
+        </div>
+        <div class="register-table">
+          <table class="manual-table registers">
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Length</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>300</code></td>
+                <td>1</td>
+                <td>Conveyor Run (1/0)</td>
+              </tr>
+              <tr>
+                <td><code>301</code></td>
+                <td>1</td>
+                <td>Emergency OK (1/0)</td>
+              </tr>
+              <tr>
+                <td><code>302–303</code></td>
+                <td>2</td>
+                <td>Quality Score (uint32)</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="alert-box info">
+            <i class="fas fa-info-circle"></i>
+            <div class="alert-content">
+              For advanced diagnostics, contact SmartLine support for the full register map.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <div class="manual-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <strong>SmartLine Automation</strong> · Support: support@smartline.local
+      </div>
+      <div class="footer-right">
+        This document is intended for commissioning and operator training.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function downloadPDF() {
+  alert('PDF download feature (Feature not implemented in demo)');
+}
+
+// Smooth scrolling for navigation links
+document.addEventListener('DOMContentLoaded', function() {
+  const tocLinks = document.querySelectorAll('.toc-nav a');
+  
+  tocLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(targetId);
+      
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+  
+  // Highlight current section in TOC
+  function highlightCurrentSection() {
+    const sections = document.querySelectorAll('.manual-section');
+    const tocLinks = document.querySelectorAll('.toc-nav a');
+    
+    let currentSection = '';
+    const scrollPosition = window.pageYOffset + 100;
+    
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.offsetHeight;
+      
+      if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+        currentSection = section.getAttribute('id');
+      }
+    });
+    
+    tocLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === `#${currentSection}`) {
+        link.classList.add('active');
+      }
+    });
+  }
+  
+  window.addEventListener('scroll', highlightCurrentSection);
+  highlightCurrentSection(); // Initial call
+});
+</script>
+{% endblock %}

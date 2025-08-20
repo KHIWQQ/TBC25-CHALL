@@ -1,0 +1,39 @@
+services:
+  note_hub:
+    build:
+      context: .
+    image: ctfae-ad:note_hub
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: note_hub
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+        - postgres_data:/var/lib/postgresql/data
+    restart: always
+  pgcat:
+    image: ghcr.io/postgresml/pgcat:latest
+    command: bash -c "pgcat /etc/pgcat/pgcat.toml >/dev/null"
+    ports:
+      - "54320:5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./pgcat.toml:/etc/pgcat/pgcat.toml
+    restart: always
+
+volumes:
+  postgres_data:

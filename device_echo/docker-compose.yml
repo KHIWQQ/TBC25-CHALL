@@ -1,0 +1,12 @@
+services:
+  device_echo:
+    build: .
+    image: ctfae-ad:device_echo
+    ports:
+      - "5050:5050"
+    volumes:
+      - device_echo:/tmp/outputs
+    restart: always
+
+volumes:
+  device_echo:

@@ -1,0 +1,11 @@
+services:
+  whisper:
+    build: .
+    image: whisper:app
+    container_name: whisper
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./whisper:/app
+    working_dir: /app
+    restart: always

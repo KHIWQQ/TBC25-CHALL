@@ -1,0 +1,30 @@
+services:
+  web:
+    build: .
+    image: filehub:web
+    ports:
+      - "8181:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx.conf:/etc/nginx/sites-available/default
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=fileshare
+      - DB_USER=fileshare_user
+      - DB_PASS=secure_password_123
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_123
+      MYSQL_DATABASE: fileshare
+      MYSQL_USER: fileshare_user
+      MYSQL_PASSWORD: secure_password_123
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+
+volumes:
+  db_data:

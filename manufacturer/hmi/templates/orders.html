@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Production Orders{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+  <div class="orders-header">
+    <div class="header-left">
+      <h2><i class="fas fa-clipboard-list"></i> Production Orders</h2>
+      <p class="orders-subtitle">Manage and monitor manufacturing orders</p>
+    </div>
+    
+    <div class="header-actions">
+      <button class="action-btn secondary" onclick="refreshOrders()">
+        <i class="fas fa-sync-alt"></i>
+        <span>Refresh</span>
+      </button>
+      
+      <a href="/upload" class="action-btn primary">
+        <i class="fas fa-plus"></i>
+        <span>New Order</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="orders-stats">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <i class="fas fa-list"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ orders|length if orders else 0 }}</span>
+        <span class="stat-label">Total Orders</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <i class="fas fa-play"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">2</span>
+        <span class="stat-label">In Progress</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">1</span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon completed">
+        <i class="fas fa-check"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">15</span>
+        <span class="stat-label">Completed</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="orders-filters">
+    <div class="filter-group">
+      <label for="status-filter">
+        <i class="fas fa-filter"></i>
+        Status Filter:
+      </label>
+      <select id="status-filter" onchange="filterOrders()">
+        <option value="all">All Orders</option>
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label for="search-orders">
+        <i class="fas fa-search"></i>
+        Search:
+      </label>
+      <input 
+        type="text" 
+        id="search-orders" 
+        placeholder="Search orders..." 
+        oninput="searchOrders()"
+      />
+    </div>
+  </div>
+
+  <div class="orders-table-container">
+    <div class="table-header">
+      <h3><i class="fas fa-table"></i> Order Details</h3>
+      <div class="table-actions">
+        <button class="table-action" onclick="exportOrders()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-wrapper">
+      <table class="orders-table" id="orders-table">
+        <thead>
+          <tr>
+            <th class="sortable" onclick="sortTable(0)">
+              <i class="fas fa-sort"></i>
+              Order ID
+            </th>
+            <th class="sortable" onclick="sortTable(1)">
+              <i class="fas fa-sort"></i>
+              Name
+            </th>
+            <th class="sortable" onclick="sortTable(2)">
+              <i class="fas fa-sort"></i>
+              Size
+            </th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Progress</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if orders %}
+            {% for o in orders %}
+              <tr class="order-row" data-status="{{ 'in-progress' if loop.index <= 2 else 'pending' if loop.index == 3 else 'completed' }}">
+                <td class="order-id">
+                  <span class="id-badge">ORD-{{ "%04d"|format(loop.index) }}</span>
+                </td>
+                <td class="order-name">
+                  <i class="fas fa-file-alt"></i>
+                  {{ o.name }}
+                </td>
+                <td class="order-size">
+                  <span class="size-badge">{{ o.size }}</span>
+                </td>
+                <td class="order-status">
+                  {% if loop.index <= 2 %}
+                    <span class="status-badge in-progress">
+                      <i class="fas fa-play"></i>
+                      In Progress
+                    </span>
+                  {% elif loop.index == 3 %}
+                    <span class="status-badge pending">
+                      <i class="fas fa-clock"></i>
+                      Pending
+                    </span>
+                  {% else %}
+                    <span class="status-badge completed">
+                      <i class="fas fa-check"></i>
+                      Completed
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="order-priority">
+                  {% if loop.index <= 2 %}
+                    <span class="priority-badge high">High</span>
+                  {% elif loop.index == 3 %}
+                    <span class="priority-badge medium">Medium</span>
+                  {% else %}
+                    <span class="priority-badge low">Low</span>
+                  {% endif %}
+                </td>
+                <td class="order-progress">
+                  <div class="progress-container">
+                    <div class="progress-bar">
+                      {% if loop.index <= 2 %}
+                        <div class="progress-fill" style="width: {{ 45 + (loop.index * 20) }}%"></div>
+                      {% elif loop.index == 3 %}
+                        <div class="progress-fill" style="width: 0%"></div>
+                      {% else %}
+                        <div class="progress-fill completed" style="width: 100%"></div>
+                      {% endif %}
+                    </div>
+                    <span class="progress-text">
+                      {% if loop.index <= 2 %}
+                        {{ 45 + (loop.index * 20) }}%
+                      {% elif loop.index == 3 %}
+                        0%
+                      {% else %}
+                        100%
+                      {% endif %}
+                    </span>
+                  </div>
+                </td>
+                <td class="order-created">
+                  <i class="fas fa-calendar"></i>
+                  {{ "2024-01-{:02d}".format(loop.index) }}
+                </td>
+                <td class="order-actions">
+                  <div class="action-buttons">
+                    <button class="btn-action view" onclick="viewOrder('ORD-{{ "%04d"|format(loop.index) }}')" title="View Details">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    
+                    {% if loop.index <= 3 %}
+                      <button class="btn-action edit" onclick="editOrder('ORD-{{ "%04d"|format(loop.index) }}')" title="Edit Order">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      
+                      {% if loop.index <= 2 %}
+                        <button class="btn-action pause" onclick="pauseOrder('ORD-{{ "%04d"|format(loop.index) }}')" title="Pause Order">
+                          <i class="fas fa-pause"></i>
+                        </button>
+                      {% else %}
+                        <button class="btn-action start" onclick="startOrder('ORD-{{ "%04d"|format(loop.index) }}')" title="Start Order">
+                          <i class="fas fa-play"></i>
+                        </button>
+                      {% endif %}
+                    {% endif %}
+                    
+                    <button class="btn-action delete" onclick="deleteOrder('ORD-{{ "%04d"|format(loop.index) }}')" title="Delete Order">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="no-orders">
+              <td colspan="8" class="no-data">
+                <div class="no-data-content">
+                  <i class="fas fa-inbox"></i>
+                  <h3>No Orders Found</h3>
+                  <p>No production orders available. Upload a new order to get started.</p>
+                  <a href="/upload" class="action-btn primary">
+                    <i class="fas fa-upload"></i>
+                    Upload Order
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function refreshOrders() {
+  const refreshBtn = document.querySelector('.header-actions .fa-sync-alt');
+  refreshBtn.classList.add('fa-spin');
+  
+  setTimeout(() => {
+    location.reload();
+  }, 1000);
+}
+
+function filterOrders() {
+  const filter = document.getElementById('status-filter').value;
+  const rows = document.querySelectorAll('.order-row');
+  
+  rows.forEach(row => {
+    const status = row.dataset.status;
+    if (filter === 'all' || status === filter) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+function searchOrders() {
+  const search = document.getElementById('search-orders').value.toLowerCase();
+  const rows = document.querySelectorAll('.order-row');
+  
+  rows.forEach(row => {
+    const name = row.querySelector('.order-name').textContent.toLowerCase();
+    const id = row.querySelector('.order-id').textContent.toLowerCase();
+    
+    if (name.includes(search) || id.includes(search)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+function sortTable(columnIndex) {
+  const table = document.getElementById('orders-table');
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('.order-row'));
+  
+  rows.sort((a, b) => {
+    const aText = a.cells[columnIndex].textContent.trim();
+    const bText = b.cells[columnIndex].textContent.trim();
+    return aText.localeCompare(bText);
+  });
+  
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+function viewOrder(orderId) {
+  alert(`Viewing details for ${orderId} (Feature not implemented in demo)`);
+}
+
+function editOrder(orderId) {
+  alert(`Editing ${orderId} (Feature not implemented in demo)`);
+}
+
+function startOrder(orderId) {
+  alert(`Starting ${orderId} (Feature not implemented in demo)`);
+}
+
+function pauseOrder(orderId) {
+  alert(`Pausing ${orderId} (Feature not implemented in demo)`);
+}
+
+function deleteOrder(orderId) {
+  if (confirm(`Are you sure you want to delete ${orderId}?`)) {
+    alert(`Deleting ${orderId} (Feature not implemented in demo)`);
+  }
+}
+
+function exportOrders() {
+  alert('Exporting orders data... (Feature not implemented in demo)');
+}
+</script>
+{% endblock %}

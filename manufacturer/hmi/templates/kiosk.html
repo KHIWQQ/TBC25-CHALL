@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Kiosk Interface{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-icon">
+        <i class="fas fa-industry"></i>
+      </div>
+      <h2>SmartLine Kiosk</h2>
+      <p class="login-subtitle">Quick order upload for shop-floor use</p>
+    </div>
+    
+    <div class="security-notice">
+      <i class="fas fa-info-circle"></i>
+      <span>Public Access - Orders applied at next production cycle</span>
+    </div>
+    
+    <form method="POST" action="/kiosk/upload" enctype="multipart/form-data" class="login-form">
+      <input type="hidden" name="nonce" value="{{ nonce }}">
+      
+      <div class="form-group">
+        <label for="order_name">
+          <i class="fas fa-tag"></i>
+          Order Name
+        </label>
+        <input 
+          type="text" 
+          id="order_name" 
+          name="order_name" 
+          placeholder="Order-123" 
+          class="form-input"
+          required
+        />
+        <small class="form-help">Enter a unique identifier for this production order</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="file">
+          <i class="fas fa-file-upload"></i>
+          Production File
+        </label>
+        <div class="upload-zone" onclick="document.getElementById('file').click()">
+          <div class="upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <h3>Select Production File</h3>
+          <p>Click here or drag and drop your <span class="upload-link">.wcp</span> file</p>
+        </div>
+        <input 
+          type="file" 
+          id="file" 
+          name="file" 
+          accept=".wcp,text/plain,application/octet-stream" 
+          required 
+          class="file-input"
+        />
+        <small class="form-help">Supported formats: .wcp files and plain text</small>
+      </div>
+      
+      <button type="submit" class="login-button">
+        <i class="fas fa-paper-plane"></i>
+        <span>Send to Production Line</span>
+      </button>
+    </form>
+    
+    <div class="login-footer">
+      <div class="system-info">
+        <div class="info-item">
+          <i class="fas fa-clock"></i>
+          <span>24/7 Available</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-shield-check"></i>
+          <span>Secure Upload</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-cogs"></i>
+          <span>Auto Processing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Enhanced file upload handling
+document.getElementById('file').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const uploadZone = document.querySelector('.upload-zone');
+  const uploadIcon = uploadZone.querySelector('i');
+  const uploadTitle = uploadZone.querySelector('h3');
+  const uploadText = uploadZone.querySelector('p');
+  
+  if (file) {
+    uploadIcon.className = 'fas fa-file-check';
+    uploadTitle.textContent = 'File Selected';
+    uploadText.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+    uploadZone.style.borderColor = 'var(--success)';
+    uploadZone.style.background = 'rgba(76, 175, 80, 0.1)';
+  }
+});
+
+// Drag and drop functionality
+const uploadZone = document.querySelector('.upload-zone');
+
+uploadZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+
+uploadZone.addEventListener('dragleave', function(e) {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+});
+
+uploadZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    document.getElementById('file').files = files;
+    document.getElementById('file').dispatchEvent(new Event('change'));
+  }
+});
+
+// Auto-focus on order name field
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('order_name').focus();
+});
+
+// Form validation
+document.querySelector('.login-form').addEventListener('submit', function(e) {
+  const orderName = document.getElementById('order_name').value.trim();
+  const fileInput = document.getElementById('file');
+  
+  if (!orderName) {
+    alert('Please enter an order name');
+    e.preventDefault();
+    return;
+  }
+  
+  if (!fileInput.files.length) {
+    alert('Please select a production file');
+    e.preventDefault();
+    return;
+  }
+});
+</script>
+{% endblock %}

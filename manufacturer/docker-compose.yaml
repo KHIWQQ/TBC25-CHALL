@@ -1,0 +1,116 @@
+version: "3.9"
+
+x-env: &env
+  TZ: Europe/Paris
+  PYTHONUNBUFFERED: "1"
+
+networks:
+  it_net:
+    driver: bridge
+  ot_net:
+    driver: bridge
+
+services:
+  router:
+    build: ./router
+    container_name: router
+    cap_add:
+      - NET_ADMIN
+    networks:
+      - it_net
+      - ot_net
+    environment:
+      <<: *env
+    command: ["/entrypoint.sh"]
+
+  historiandb:
+    image: postgres:15-alpine
+    container_name: historiandb
+    environment:
+      POSTGRES_USER: hist
+      POSTGRES_PASSWORD: histpass
+      POSTGRES_DB: histdb
+      <<: *env
+    networks:
+      - ot_net
+    volumes:
+      - ./historian/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hist -d histdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  historian:
+    build: ./historian
+    container_name: historian
+    environment:
+      DB_HOST: historiandb
+      DB_NAME: histdb
+      DB_USER: hist
+      DB_PASS: histpass
+      PLC_HOST: plc1
+      PLC_PORT: 502
+      <<: *env
+    depends_on:
+      historiandb:
+        condition: service_healthy
+      plc1:
+        condition: service_started
+    networks:
+      - ot_net
+
+  plc1:
+    build: ./plc
+    container_name: plc1
+    environment:
+      ROLE: primary
+      INSTANCE_ID: team-1
+      MGMT_ALLOWLIST: ""
+      CHECKER_PUB_PEM: |-
+        -----BEGIN PUBLIC KEY-----
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEf1uwu7Rnh4sxTecIg8jbdNi7v2cE
+        PpYmKSJU6J4hjB/p/6ZhlBlMISIYgNoa2oqRp3K0UStFKceibedLGxDz7A==
+        -----END PUBLIC KEY-----
+      <<: *env
+    networks:
+      - ot_net
+    volumes:
+      - ./plc/data:/data
+    ports:
+      - "1502:502"
+      - "9000:9000"
+
+  hmi:
+    build: ./hmi
+    container_name: hmi
+    environment:
+      PLC_HOST: plc1
+      PLC_PORT: 502
+      DEFAULT_USER: admin
+      DEFAULT_PASS: admin
+      SECRET_KEY: 82953b1abea4a54de49783e3b2cc12181dafc90005125f38ff5e12b126c7f4ea
+      <<: *env
+    networks:
+      - ot_net
+    ports:
+      - "8080:80"
+    depends_on:
+      - plc1
+
+  scada:
+    build: ./scada
+    container_name: scada
+    environment:
+      PLC_HOST: plc1
+      PLC_PORT: 502
+      DB_HOST: historiandb
+      DB_NAME: histdb
+      DB_USER: hist
+      DB_PASS: histpass
+      <<: *env
+    networks:
+      - it_net
+      - ot_net
+    ports:
+      - "8090:8090"

@@ -1,0 +1,3 @@
+Flask==3.0.3
+pyModbusTCP==0.2.0
+Gunicorn==22.0.0

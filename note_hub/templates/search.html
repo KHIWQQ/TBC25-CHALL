@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Notes{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500 text-center">
+        Search Public Notes
+    </h1>
+    
+    <div class="card mb-8 shadow-lg border border-gray-100">
+        <form method="post" action="{{ url_for('search') }}">
+            <div class="mb-6">
+                <label for="query" class="block font-medium mb-2 text-gray-700">Search Query</label>
+                <div>
+                    <input type="text" id="query" name="query" class="input" required 
+                           placeholder="Enter words to search for in note titles">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+                Search
+            </button>
+        </form>
+    </div>
+
+    {% if results %}
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+                Found {{ results|length }} {{ 'result' if results|length == 1 else 'results' }}:
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 gap-6">
+            {% for result in results %}
+                    <div class="card shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-green-400">
+                        <h2 class="text-2xl font-semibold mb-3 text-gray-800">{{ result['title'] }}</h2>
+                        <div class="flex items-center mb-4">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="text-sm font-mono text-gray-500">UUID: {{ result['uuid'] }}</span>
+                            </div>
+                            <div class="flex items-center ml-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="text-sm text-gray-500">By: {{ result['username'] }}</span>
+                            </div>
+                            <span class="ml-3 px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">
+                                Public Note
+                            </span>
+                        </div>
+                        <div class="bg-gray-50 p-5 rounded-lg border border-gray-100">
+                            <p class="whitespace-pre-line">{{ result['content'] }}</p>
+                        </div>
+                        
+                        <div class="mt-5 text-right">
+                            <button class="text-gray-500 hover:text-purple-600 transition-colors inline-flex items-center" title="Copy UUID">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                </svg>
+                                Copy UUID
+                            </button>
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+    {% elif request.method == 'POST' %}
+        <div class="alert alert-info flex items-center justify-center py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-lg">No matching notes found. Try a different search term.</span>
+        </div>
+    {% endif %}
+    
+    <div class="mt-8 p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-sm border border-gray-100 text-center">
+        <div class="max-w-lg mx-auto">
+            <p class="text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                Search for words in public note titles. All matching results will be shown.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

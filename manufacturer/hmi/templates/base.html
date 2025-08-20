@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartLine HMI - Industrial Control System</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Font Awesome for industrial icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <header class="header-industrial">
+    <div class="header-content">
+      <div class="logo-section">
+        <i class="fas fa-industry header-icon"></i>
+        <h1>SmartLine HMI</h1>
+        <div class="system-status">
+          <span class="status-indicator online"></span>
+          <span class="status-text">System Online</span>
+        </div>
+      </div>
+      
+      <nav class="main-navigation">
+        <a href="/" class="nav-item" data-page="home">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="/login" class="nav-item" data-page="login">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </a>
+        <a href="/dashboard" class="nav-item" data-page="dashboard">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/orders" class="nav-item" data-page="orders">
+          <i class="fas fa-clipboard-list"></i>
+          <span>Orders</span>
+        </a>
+        <a href="/upload" class="nav-item" data-page="upload">
+          <i class="fas fa-upload"></i>
+          <span>Upload</span>
+        </a>
+        <a href="/manual" class="nav-item" data-page="manual">
+          <i class="fas fa-book"></i>
+          <span>Manual</span>
+        </a>
+      </nav>
+      
+      <div class="header-info">
+        <div class="datetime-display">
+          <i class="fas fa-clock"></i>
+          <span id="current-time"></span>
+        </div>
+        <div class="system-info">
+          <span class="system-version">v2.1.0</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3><i class="fas fa-cogs"></i> System</h3>
+        <div class="sidebar-item">
+          <span class="label">CPU Usage:</span>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 45%"></div>
+          </div>
+          <span class="value">45%</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="label">Memory:</span>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 67%"></div>
+          </div>
+          <span class="value">67%</span>
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <h3><i class="fas fa-network-wired"></i> Network</h3>
+        <div class="sidebar-item">
+          <span class="label">PLC Status:</span>
+          <span class="status-badge connected">Connected</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="label">Database:</span>
+          <span class="status-badge connected">Online</span>
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <h3><i class="fas fa-bell"></i> Alerts</h3>
+        <div class="alert-item info">
+          <i class="fas fa-info-circle"></i>
+          <span>System running normally</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <div class="breadcrumb">
+          <i class="fas fa-home"></i>
+          <span>SmartLine HMI</span>
+          <i class="fas fa-chevron-right"></i>
+          <span class="current-page">{% block page_title %}Dashboard{% endblock %}</span>
+        </div>
+      </div>
+      
+      <!-- Flash Messages with enhanced styling -->
+      <div class="flash-container">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+          <div class="flash flash-{{ category }}">
+            <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' }}"></i>
+            <span>{{ message }}</span>
+            <button class="flash-close" onclick="this.parentElement.remove()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <div class="content-body">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer-industrial">
+    <div class="footer-content">
+      <div class="footer-section">
+        <span>&copy; 2024 SmartLine Manufacturing Systems</span>
+      </div>
+      <div class="footer-section">
+        <span>Industrial HMI Interface</span>
+      </div>
+      <div class="footer-section">
+        <span>Connected Devices: <strong>3</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Update current time
+    function updateTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      const dateString = now.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      document.getElementById('current-time').textContent = `${dateString} ${timeString}`;
+    }
+    
+    // Update time every second
+    updateTime();
+    setInterval(updateTime, 1000);
+    
+    // Add active class to current navigation item
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPath = window.location.pathname;
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      navItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (href === currentPath || (currentPath === '/' && href === '/')) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

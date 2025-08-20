@@ -1,0 +1,13 @@
+services:
+  legacydisk:
+    build: .
+    container_name: legacydisk
+    platform: linux/amd64
+    ports:
+      - "5454:5000"
+      - "4444:4444"
+    volumes:
+      - ./challenge:/home/legacydisk
+    working_dir: /home/legacydisk
+    restart: always
+    tty: true

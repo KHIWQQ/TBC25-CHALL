@@ -1,0 +1,52 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: cheque_reader:frontend
+    container_name: check_deposit_frontend_container
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: cheque_reader:backend
+    container_name: check_deposit_backend_container
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DATABASE_URL=file:/app/dev.db
+    volumes:
+      - ./backend/dev.db:/app/dev.db
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: check_deposit_postgres_container
+    environment:
+      - POSTGRES_DB=cheque_reader
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: check_deposit_nginx_container
+    ports:
+      - "8888:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

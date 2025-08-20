@@ -1,0 +1,16 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    platform: linux/amd64
+    environment:
+      - OUT_DIR=/app/data
+      - FUNDING_WEI=10000000000000000000
+      - JWT_AUD=supp-dex
+      - JWT_ISS_CHECKER=checker
+    ports:
+      - 5000:5000
+      - 8545:8545
+    volumes:
+      - ./data:/app/data

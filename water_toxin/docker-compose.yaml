@@ -1,0 +1,25 @@
+services:
+  plc:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.plc
+    container_name: plc
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile
+    container_name: gateway
+    depends_on: [plc]
+    volumes:
+      - ./data:/data
+    environment:
+      - PTR_LEAK_SECS=25
+      - PTR_WINDOW_SECS=25
+      - FLAG_WINDOW_SECS=25
+      - CHK_RESP_TTL_SECS=5.0
+      - CHECKER_PUBKEY_B64=yc5XfhMU7Yb3zUx4tA2CSNpyUqrXKW6JXAaLYiXmQAA=
+    ports:
+      - "502:502/tcp"
+    restart: unless-stopped
